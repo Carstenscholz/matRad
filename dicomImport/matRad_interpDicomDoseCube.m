@@ -45,7 +45,7 @@ dose.cube = double(dosedata);
 % dose.cube = single(dosedata);
 
 % give it an internal name
-dose.internalName = currDose{12};
+%dose.internalName = currDose{12};
 
 % read out the resolution
 dose.resolution.x = doseInfo.PixelSpacing(1);

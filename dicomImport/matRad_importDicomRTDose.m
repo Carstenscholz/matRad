@@ -36,6 +36,8 @@ function [ resultGUI ] = matRad_importDicomRTDose(ct, rtDoseFiles, pln)
 %% import and interpolate dose files
 % number of dosefiles
 numDoseFiles = size(rtDoseFiles,1);
+addedDose = 0;
+
 
 for i = 1 : numDoseFiles
     currDose = rtDoseFiles(i,:);
@@ -49,6 +51,10 @@ for i = 1 : numDoseFiles
     doseTypeHelper      = dose.(itemName).dicomInfo.DoseType;
     doseSumHelper       = dose.(itemName).dicomInfo.DoseSummationType;
     doseInstanceHelper  = dose.(itemName).dicomInfo.InstanceNumber;
+    
+    if isempty(doseInstanceHelper)
+        doseInstanceHelper = i;
+    end
     
     if strncmpi(doseTypeHelper,'PHYSICAL',6)
         doseTypeHelper = 'physicalDose_';
@@ -68,10 +74,17 @@ for i = 1 : numDoseFiles
         dose.(itemName).cube = dose.(itemName).cube / pln.numOfFractions;
     end
     
+    
     resultGUI.(resultName) = dose.(itemName).cube;
     resultGUI.doseMetaInfo.(resultName) = dose.(itemName).dicomInfo;
     
+    addedDose = addedDose + resultGUI.(resultName);
+    
 end
+
+resultGUI.addedDose = addedDose;
+
 % save timeStamp
 resultGUI.doseMetaInfo.timeStamp = datestr(clock);
+
 end

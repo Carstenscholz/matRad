@@ -1,4 +1,4 @@
-function [ct, cst, pln, resultGUI] = matRad_importDicom( files, dicomMetaBool )
+function [ct, cst, pln, resultGUI, stf] = matRad_importDicom( files, dicomMetaBool )
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % matRad wrapper function to import a predefined set of dicom files into
 % matRad's native data formats
@@ -114,12 +114,28 @@ if isfield(files,'rtplan')
 end
 
 %% import stf
+
+if isfield(files,{'room'})
+    
+    if (strcmp(files.room,'Room1Fixed90')) || (strcmp(files.room,'Room2Fixed90'))
+        Room = 'HITfixedBL';
+    
+    elseif strcmp(files.room,'Room3Gantry')
+        Room = 'HITgantry';
+
+    else
+      warning ('Unknown HIT treatment room.');
+    end
+else
+    Room = '';
+end
+
 if isfield(files,'rtplan')
     if ~(cellfun(@isempty,files.rtplan(1,:)))
         if (strcmp(pln.radiationMode,'protons') || strcmp(pln.radiationMode,'carbon'))
             %% import steering file
             % pln output because bixelWidth is determined via the stf
-            [stf, pln] = matRad_importDicomSteeringParticles(ct, pln, files.rtplan);
+            [stf, pln] = matRad_importDicomSteeringParticles(ct, pln, files.rtplan,Room);
         elseif strcmp(pln.radiationMode, 'photons') && isfield(pln.propStf,'collimation')
             % return correct angles in pln 
             [stf, pln] = matRad_importDicomSteeringPhotons(pln);
@@ -158,9 +174,20 @@ if exist('stf','var') && exist('resultGUI','var')
 end
 
 %% save ct, cst, pln, dose
-matRadFileName = [files.ct{1,3} '.mat']; % use default from dicom
-[FileName,PathName] = uiputfile('*','Save as...',matRadFileName);
-if ischar(FileName)
+if isfield(files,{'check'})
+      
+    switch env
+    case 'MATLAB'
+        clearvars -except ct cst pln stf resultGUI;
+    case 'OCTAVE' 
+        clear -x ct cst pln stf resultGUI;
+    end
+
+else    
+    matRadFileName = [files.ct{1,3} '.mat']; % use default from dicom
+    [FileName,PathName] = uiputfile('*','Save as...',matRadFileName);    
+
+    if ischar(FileName)
     % delete unnecessary variables
     switch env
     case 'MATLAB'
@@ -170,4 +197,7 @@ if ischar(FileName)
     end
     % save all except FileName and PathName
     save([PathName, FileName], '-regexp', '^(?!(FileName|PathName)$).','-v7.3');
+
+    end
+end
 end

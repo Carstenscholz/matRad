@@ -1,4 +1,4 @@
-function [stf, pln] = matRad_importDicomSteeringParticles(ct, pln, rtPlanFile)
+function [stf, pln] = matRad_importDicomSteeringParticles(ct, pln, rtPlanFile,Room)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % matRad function to import a matRad stf struct from dicom RTPLAN data
 % 
@@ -38,13 +38,37 @@ function [stf, pln] = matRad_importDicomSteeringParticles(ct, pln, rtPlanFile)
 %% load plan file
 % load machine data
 
-dlgBaseDataText = ['Import steering information from DICOM Plan.','Choose corresponding matRad base data for ', ...
-        pln.radiationMode, '.'];
+if isempty(Room)
+    dlgBaseDataText = ['Import steering information from DICOM Plan.','Choose corresponding matRad base data for ', ...
+         pln.radiationMode, '.'];
 % messagebox only necessary for non windows users
-if ~ispc
-    uiwait(helpdlg(dlgBaseDataText,['DICOM import - ', pln.radiationMode, ' base data' ]));
+    if ~ispc
+        uiwait(helpdlg(dlgBaseDataText,['DICOM import - ', pln.radiationMode, ' base data' ]));
+    end
+    [fileName,pathName] = uigetfile('*.mat', dlgBaseDataText);
+else
+    
+    pathName = 'C:\Users\c129z\Documents\matRad';
+
+    if strcmpi(pln.radiationMode,'carbon')
+    
+        if strcmp(Room,'HITfixedBL')
+          fileName = 'carbon_HITfixedBL.mat';
+        elseif strcmp(Room,'HITgantry')
+            fileName = 'carbon_HITgantry.mat';
+        end
+    
+    elseif strcmpi(pln.radiationMode,'protons')
+        if strcmp(Room,'HITfixedBL')
+            fileName = 'protons_HITfixedBL.mat';
+        elseif strcmp(Room,'HITgantry')
+            fileName = 'protons_HITgantry.mat';
+        end
+    
+    end
 end
-[fileName,pathName] = uigetfile('*.mat', dlgBaseDataText);
+
+
 load([pathName filesep fileName]);
 
 ix = find(fileName == '_');
