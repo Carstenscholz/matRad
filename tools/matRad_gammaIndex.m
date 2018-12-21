@@ -3,7 +3,7 @@ function [gammaCube,gammaPassRateCell] = matRad_gammaIndex(cube1,cube2,resolutio
 % gamma index calculation according to http://www.ncbi.nlm.nih.gov/pubmed/9608475
 % 
 % call
-%    gammaCube = matRad_gammaIndex(cube1,cube2,resolution,criteria,slice,interpoints,localglobal)
+%    gammaCube = matRad_gammaIndex(cube1,cube2,resolution,criteria,slice,interpoints,localglobal,cst)
 %
 % input
 %   cube1:         dose cube as an M x N x O array
@@ -192,7 +192,7 @@ if exist('cst','var')
     end
 end
 
-% visualize if applicable
+%visualize if applicable
 if exist('slice','var') && ~isempty(slice)
     figure
     set(gcf,'Color',[1 1 1]);
